@@ -189,13 +189,15 @@
 
         /* =====================================================
            EVENT INDICATOR
+
+           Small solid bar that sits just under the day
+           number inside its cell (not a full-width box).
            ===================================================== */
 
         .event-indicator {
             position: absolute;
-            background: var(--cream);
-            border: 2px solid var(--maroon);
-            border-radius: 6px;
+            background: var(--maroon);
+            border-radius: 10px;
             pointer-events: none;
             z-index: 2;
         }
@@ -208,7 +210,7 @@
         .events-area {
             width: 100%;
             background: var(--blue);
-            padding: 50px 0 70px;
+            padding: 24px 0 60px;
         }
 
 
@@ -238,16 +240,6 @@
             cursor: pointer;
             user-select: none;
             -webkit-user-select: none;
-        }
-
-
-        .event-card::after {
-            content: "Double-click / double-tap to delete";
-            display: block;
-            font-family: sans-serif;
-            font-size: 11px;
-            opacity: 0.45;
-            margin-left: 12px;
         }
 
 
@@ -446,7 +438,7 @@
         @media (max-width: 600px) {
 
             .events-area {
-                padding-top: 35px;
+                padding-top: 18px;
                 padding-bottom: 50px;
             }
 
@@ -461,11 +453,6 @@
                 min-height: 100px;
                 padding: 25px 18px;
                 font-size: 22px;
-            }
-
-
-            .event-card::after {
-                font-size: 9px;
             }
 
 
@@ -1470,10 +1457,12 @@
 
 
                 /* =================================================
-                   EVENT RECTANGLE INSIDE DAY BOX
+                   EVENT INDICATOR INSIDE DAY BOX
 
-                   This is the part that was missing from the
-                   Supabase version.
+                   A short bar that sits just under the day
+                   number, left-aligned within the cell —
+                   matching the hand-drawn underline in the
+                   design (not a full-width box).
                    ================================================= */
 
                 const dayEvents =
@@ -1498,9 +1487,27 @@
                         "event-indicator";
 
 
+                    const indicatorLeft =
+                        left +
+                        cellWidth * 0.10;
+
+
+                    const indicatorTop =
+                        top +
+                        cellHeight * 0.30;
+
+
+                    const indicatorWidth =
+                        cellWidth * 0.55;
+
+
+                    const indicatorHeight =
+                        cellHeight * 0.10;
+
+
                     indicator.style.left =
                         (
-                            left /
+                            indicatorLeft /
                             1080 *
                             100
                         ) + "%";
@@ -1508,10 +1515,7 @@
 
                     indicator.style.top =
                         (
-                            (
-                                top +
-                                cellHeight * 0.72
-                            ) /
+                            indicatorTop /
                             1920 *
                             100
                         ) + "%";
@@ -1519,7 +1523,7 @@
 
                     indicator.style.width =
                         (
-                            cellWidth /
+                            indicatorWidth /
                             1080 *
                             100
                         ) + "%";
@@ -1527,8 +1531,7 @@
 
                     indicator.style.height =
                         (
-                            cellHeight *
-                            0.12 /
+                            indicatorHeight /
                             1920 *
                             100
                         ) + "%";
