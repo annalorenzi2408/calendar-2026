@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <meta name="theme-color" content="#674550">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="2026 Calendar">
+
+    <title>2026 Calendar</title>
+
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+
+        /* =========================================================
+           FONT
+           ========================================================= */
+
+        @font-face {
+            font-family: BryndanWrite;
+            src: url("BryndanWrite.ttf");
+            font-display: swap;
+        }
+
+
+        /* =========================================================
+           COLORS
+           ========================================================= */
+
+        :root {
+            --maroon: #674550;
+            --cream: #F0DEBD;
+            --blue: #9BB7D4;
+        }
+
+
+        /* =========================================================
+           GENERAL
+           ========================================================= */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+
+            width: 100%;
+            min-height: 100%;
+
+            background: var(--maroon);
+        }
+
+        body {
+            font-family: BryndanWrite, Georgia, serif;
+
+            -webkit-tap-highlight-color: transparent;
+
+            overscroll-behavior-x: none;
+        }
+
+
+        /* =========================================================
+           APP
+           ========================================================= */
+
+        #app {
+            width: 100%;
+            min-height: 100vh;
+
+            background: var(--maroon);
+
+            display: flex;
+            justify-content: center;
+        }
+
+
+        /* =========================================================
+           POSTER
+           ========================================================= */
+
+        .poster {
+            position: relative;
+
+            width: min(100vw, 1080px);
+
+            aspect-ratio: 1080 / 1920;
+
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: top center;
+        }
+
+
+        /* =========================================================
+           START SCREEN
+           ========================================================= */
+
+        .start {
+            background-image: url("start.png");
+        }
+
+
+        /* =========================================================
+           MONTH BACKGROUNDS
+           ========================================================= */
+
+        .october {
+            background-image: url("october.png");
+        }
+
+        .november {
+            background-image: url("november.png");
+        }
+
+        .december {
+            background-image: url("december.png");
+        }
+
+
+        /* =========================================================
+           INVISIBLE CLICK AREAS
+           ========================================================= */
+
+        .click-area {
+            position: absolute;
+
+            border: none;
+
+            background: transparent;
+
+            padding: 0;
+            margin: 0;
+
+            cursor: pointer;
+
+            touch-action: manipulation;
+        }
+
+
+        /* =========================================================
+           START SCREEN BUTTONS
+           ========================================================= */
+
+        .month-button {
+            left: 12.037%;
+
+            width: 75.833%;
+
+            height: 9.531%;
+        }
+
+        .month-button.october-button {
+            top: 35.677%;
+        }
+
+        .month-button.november-button {
+            top: 52.604%;
+        }
+
+        .month-button.december-button {
+            top: 69.531%;
+        }
+
+
+        /* =========================================================
+           BACK ARROW
+           ========================================================= */
+
+        .back-button {
+            left: 0;
+
+            top: 0;
+
+            width: 17.593%;
+
+            height: 7.813%;
+        }
+
+
+        /* =========================================================
+           DAY CLICK AREAS
+           ========================================================= */
+
+        .day-button {
+            position: absolute;
+
+            border: none;
+
+            background: transparent;
+
+            padding: 0;
+
+            cursor: pointer;
+
+            touch-action: manipulation;
+        }
+
+
+        /* =========================================================
+           EVENTS AREA
+           ========================================================= */
+
+        .events-area {
+            width: min(100vw, 1080px);
+
+            margin: 0 auto;
+
+            background: var(--blue);
+
+            padding-top: 70px;
+
+            padding-bottom: 70px;
+        }
+
+
+        /* =========================================================
+           EVENT LIST
+           ========================================================= */
+
+        .events-list {
+            width: 76.296%;
+
+            margin: 0 auto;
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 40px;
+        }
+
+
+        /* =========================================================
+           EVENT CARD
+           ========================================================= */
+
+        .event-card {
+
+            width: 100%;
+
+            min-height: 150px;
+
+            background: var(--cream);
+
+            border: 3px solid var(--maroon);
+
+            border-radius: 30px;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            text-align: center;
+
+            color: black;
+
+            font-size: clamp(16px, 1.85vw, 20px);
+
+            line-height: 1.2;
+
+            padding: 25px 45px;
+
+            cursor: pointer;
+
+            position: relative;
+
+            user-select: none;
+
+            -webkit-user-select: none;
+
+            touch-action: manipulation;
+
+            transition:
+                transform 0.12s ease,
+                opacity 0.12s ease;
+        }
+
+
+        .event-card:active {
+            transform: scale(0.98);
+        }
+
+
+        /* Small hint */
+        .event-card::after {
+
+            content: "Double-tap to delete";
+
+            position: absolute;
+
+            bottom: 6px;
+
+            left: 0;
+
+            right: 0;
+
+            text-align: center;
+
+            font-family: Arial, sans-serif;
+
+            font-size: 9px;
+
+            opacity: 0.4;
+        }
+
+
+        /* =========================================================
+           MODAL
+           ========================================================= */
+
+        .modal-background {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 1000;
+
+            background: rgba(0, 0, 0, 0.5);
+
+            display: none;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+        }
+
+
+        .modal-background.visible {
+            display: flex;
+        }
+
+
+        .modal {
+
+            width: min(92vw, 430px);
+
+            background: var(--cream);
+
+            border-radius: 25px;
+
+            padding: 25px;
+
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.35);
+
+            text-align: center;
+
+            color: var(--maroon);
+        }
+
+
+        .modal h2 {
+
+            margin-top: 0;
+
+            margin-bottom: 18px;
+
+            font-size: 25px;
+        }
+
+
+        .modal input {
+
+            width: 100%;
+
+            padding: 13px;
+
+            font-family: BryndanWrite, Georgia, serif;
+
+            font-size: 18px;
+
+            border: 1px solid var(--maroon);
+
+            border-radius: 12px;
+
+            outline: none;
+        }
+
+
+        .modal-buttons {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 12px;
+
+            margin-top: 20px;
+        }
+
+
+        .modal button {
+
+            padding: 11px 20px;
+
+            border-radius: 12px;
+
+            border: 1px solid var(--maroon);
+
+            font-family: BryndanWrite, Georgia, serif;
+
+            font-size: 17px;
+
+            cursor: pointer;
+        }
+
+
+        .add-button,
+        .delete-button {
+
+            background: var(--maroon);
+
+            color: var(--cream);
+        }
+
+
+        .cancel-button {
+
+            background: var(--cream);
+
+            color: var(--maroon);
+        }
+
+
+        .delete-message {
+
+            font-family: Arial, sans-serif;
+
+            color: #222;
+
+            line-height: 1.4;
+
+            margin-bottom: 10px;
+        }
+
+
+        /* =========================================================
+           PHONE ADJUSTMENTS
+           ========================================================= */
+
+        @media (max-width: 600px) {
+
+            .events-area {
+
+                padding-top: 45px;
+
+                padding-bottom: 45px;
+            }
+
+            .events-list {
+
+                width: 88%;
+
+                gap: 25px;
+            }
+
+            .event-card {
+
+                min-height: 110px;
+
+                border-radius: 22px;
+
+                border-width: 2px;
+
+                padding: 25px 20px 28px;
+
+                font-size: 17px;
+            }
+
+            .event-card::after {
+
+                font-size: 8px;
+
+                bottom: 5px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div id="app"></div>
+
+
+<!-- =============================================================
+     MODAL
+     ============================================================= -->
+
+<div id="modalBackground"
+     class="modal-background">
+
+    <div id="modal"
+         class="modal">
+    </div>
+
+</div>
+
+
+<script>
+
+    /* ============================================================
+       SETTINGS
+       ============================================================ */
+
+    const YEAR = 2026;
+
+    const MONTHS = {
+
+        october: 10,
+
+        november: 11,
+
+        december: 12
+
+    };
+
+
+    const MONTH_NAMES = {
+
+        10: "October",
+
+        11: "November",
+
+        12: "December"
+
+    };
+
+
+    const STORAGE_KEY =
+        "calendar_2026_events";
+
+
+    /* ============================================================
+       VARIABLES
+       ============================================================ */
+
+    let events = loadEvents();
+
+    let currentMonth = null;
+
+
+    const app =
+        document.getElementById("app");
+
+
+    const modalBackground =
+        document.getElementById("modalBackground");
+
+
+    const modal =
+        document.getElementById("modal");
+
+
+    /* ============================================================
+       LOAD EVENTS
+       ============================================================ */
+
+    function loadEvents() {
+
+        try {
+
+            const saved =
+                localStorage.getItem(
+                    STORAGE_KEY
+                );
+
+            if (!saved) {
+
+                return {};
+
+            }
+
+            return JSON.parse(saved);
+
+        } catch (error) {
+
+            console.error(error);
+
+            return {};
+
+        }
+
+    }
+
+
+    /* ============================================================
+       SAVE EVENTS
+       ============================================================ */
+
+    function saveEvents() {
+
+        localStorage.setItem(
+
+            STORAGE_KEY,
+
+            JSON.stringify(events)
+
+        );
+
+    }
+
+
+    /* ============================================================
+       SHOW START SCREEN
+       ============================================================ */
+
+    function showStart() {
+
+        currentMonth = null;
+
+        app.innerHTML = `
+
+            <section class="poster start">
+
+                <button
+                    class="
+                        click-area
+                        month-button
+                        october-button
+                    "
+                    data-month="october">
+                </button>
+
+
+                <button
+                    class="
+                        click-area
+                        month-button
+                        november-button
+                    "
+                    data-month="november">
+                </button>
+
+
+                <button
+                    class="
+                        click-area
+                        month-button
+                        december-button
+                    "
+                    data-month="december">
+                </button>
+
+            </section>
+
+        `;
+
+
+        document
+            .querySelectorAll(
+                "[data-month]"
+            )
+            .forEach(button => {
+
+                button.addEventListener(
+                    "click",
+                    () => {
+
+                        showMonth(
+                            button.dataset.month
+                        );
+
+                    }
+                );
+
+            });
+
+
+        window.scrollTo(
+            0,
+            0
+        );
+
+    }
+
+
+    /* ============================================================
+       NUMBER OF DAYS
+       ============================================================ */
+
+    function daysInMonth(
+        month
+    ) {
+
+        return new Date(
+            YEAR,
+            month,
+            0
+        ).getDate();
+
+    }
+
+
+    /* ============================================================
+       MONDAY-FIRST DAY INDEX
+       ============================================================ */
+
+    function mondayIndex(
+        date
+    ) {
+
+        const day =
+            date.getDay();
+
+        return (
+            day + 6
+        ) % 7;
+
+    }
+
+
+    /* ============================================================
+       GET DAY POSITION
+       ============================================================ */
+
+    function getDayPosition(
+        month,
+        day
+    ) {
+
+        const firstDay =
+            new Date(
+                YEAR,
+                month - 1,
+                1
+            );
+
+
+        const offset =
+            mondayIndex(
+                firstDay
+            );
+
+
+        const index =
+            offset + day - 1;
+
+
+        return {
+
+            row:
+                Math.floor(
+                    index / 7
+                ),
+
+            column:
+                index % 7
+
+        };
+
+    }
+
+
+    /* ============================================================
+       SHOW MONTH
+       ============================================================ */
+
+    function showMonth(
+        monthName
+    ) {
+
+        currentMonth =
+            monthName;
+
+
+        app.innerHTML = "";
+
+
+        /* --------------------------------------------------------
+           Calendar poster
+           -------------------------------------------------------- */
+
+        const poster =
+            document.createElement(
+                "section"
+            );
+
+
+        poster.className =
+            `poster ${monthName}`;
+
+
+        /* --------------------------------------------------------
+           Back button
+           -------------------------------------------------------- */
+
+        const back =
+            document.createElement(
+                "button"
+            );
+
+
+        back.className =
+            "click-area back-button";
+
+
+        back.addEventListener(
+            "click",
+            showStart
+        );
+
+
+        poster.appendChild(
+            back
+        );
+
+
+        /* --------------------------------------------------------
+           Add clickable day cells
+           -------------------------------------------------------- */
+
+        const monthNumber =
+            MONTHS[monthName];
+
+
+        const totalDays =
+            daysInMonth(
+                monthNumber
+            );
+
+
+        for (
+            let day = 1;
+            day <= totalDays;
+            day++
+        ) {
+
+            const position =
+                getDayPosition(
+                    monthNumber,
+                    day
+                );
+
+
+            /*
+             * Your original Python program only displayed
+             * five calendar rows.
+             *
+             * November 2026 technically needs a sixth row,
+             * so we preserve the same behavior here.
+             */
+
+            if (
+                position.row >= 5
+            ) {
+
+                continue;
+
+            }
+
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.className =
+                "day-button";
+
+
+            /*
+             * Original coordinates:
+             *
+             * GRID_LEFT   = 112
+             * GRID_TOP    = 358
+             * GRID_RIGHT  = 988
+             * GRID_BOTTOM = 1025
+             */
+
+            const cellWidth =
+                876 / 7;
+
+
+            const cellHeight =
+                667 / 6;
+
+
+            const left =
+                112 +
+                position.column *
+                cellWidth;
+
+
+            const top =
+                358 +
+                (position.row + 1) *
+                cellHeight;
+
+
+            button.style.left =
+                (left / 1080 * 100)
+                + "%";
+
+
+            button.style.top =
+                (top / 1920 * 100)
+                + "%";
+
+
+            button.style.width =
+                (cellWidth / 1080 * 100)
+                + "%";
+
+
+            button.style.height =
+                (cellHeight / 1920 * 100)
+                + "%";
+
+
+            button.setAttribute(
+                "aria-label",
+                `Add event on ${day} ${MONTH_NAMES[monthNumber]}`
+            );
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    openAddEvent(
+                        monthName,
+                        day
+                    );
+
+                }
+            );
+
+
+            poster.appendChild(
+                button
+            );
+
+        }
+
+
+        app.appendChild(
+            poster
+        );
+
+
+        /* --------------------------------------------------------
+           Events below calendar
+           -------------------------------------------------------- */
+
+        const eventsArea =
+            document.createElement(
+                "section"
+            );
+
+
+        eventsArea.className =
+            "events-area";
+
+
+        const list =
+            document.createElement(
+                "div"
+            );
+
+
+        list.className =
+            "events-list";
+
+
+        const monthKey =
+            String(
+                monthNumber
+            );
+
+
+        const monthEvents =
+            events[monthKey] || {};
+
+
+        const days =
+            Object.keys(
+                monthEvents
+            )
+            .map(Number)
+            .sort(
+                (a, b) =>
+                    a - b
+            );
+
+
+        /* --------------------------------------------------------
+           Draw every event
+           -------------------------------------------------------- */
+
+        for (
+            const day
+            of days
+        ) {
+
+            const dayEvents =
+                monthEvents[
+                    String(day)
+                ] || [];
+
+
+            dayEvents.forEach(
+                (
+                    text,
+                    index
+                ) => {
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    card.className =
+                        "event-card";
+
+
+                    card.textContent =
+                        `${day}, ${MONTH_NAMES[monthNumber]} - ${text}`;
+
+
+                    /*
+                     * Desktop:
+                     * double-click to delete
+                     */
+
+                    card.addEventListener(
+                        "dblclick",
+                        event => {
+
+                            event.preventDefault();
+
+                            askDelete(
+                                monthName,
+                                day,
+                                index
+                            );
+
+                        }
+                    );
+
+
+                    /*
+                     * Phone:
+                     * double-tap to delete
+                     */
+
+                    let lastTap = 0;
+
+
+                    card.addEventListener(
+                        "touchend",
+                        event => {
+
+                            const now =
+                                Date.now();
+
+
+                            const difference =
+                                now - lastTap;
+
+
+                            if (
+                                difference > 0 &&
+                                difference < 450
+                            ) {
+
+                                event.preventDefault();
+
+
+                                askDelete(
+                                    monthName,
+                                    day,
+                                    index
+                                );
+
+                            }
+
+
+                            lastTap =
+                                now;
+
+                        },
+                        {
+                            passive: false
+                        }
+                    );
+
+
+                    list.appendChild(
+                        card
+                    );
+
+                }
+            );
+
+        }
+
+
+        eventsArea.appendChild(
+            list
+        );
+
+
+        app.appendChild(
+            eventsArea
+        );
+
+
+        window.scrollTo(
+            0,
+            0
+        );
+
+    }
+
+
+    /* ============================================================
+       OPEN ADD EVENT
+       ============================================================ */
+
+    function openAddEvent(
+        monthName,
+        day
+    ) {
+
+        const monthNumber =
+            MONTHS[monthName];
+
+
+        modal.innerHTML = `
+
+            <h2>
+                ${day}
+                ${MONTH_NAMES[monthNumber]}
+                ${YEAR}
+            </h2>
+
+
+            <input
+                id="eventInput"
+                type="text"
+                maxlength="120"
+                placeholder="Type your event..."
+                autocomplete="off"
+            >
+
+
+            <div class="modal-buttons">
+
+                <button
+                    class="add-button"
+                    id="addEvent">
+                    Add
+                </button>
+
+
+                <button
+                    class="cancel-button"
+                    id="cancelAdd">
+                    Cancel
+                </button>
+
+            </div>
+
+        `;
+
+
+        modalBackground.classList.add(
+            "visible"
+        );
+
+
+        const input =
+            document.getElementById(
+                "eventInput"
+            );
+
+
+        input.focus();
+
+
+        /* --------------------------------------------------------
+           Add
+           -------------------------------------------------------- */
+
+        document
+            .getElementById(
+                "addEvent"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    const text =
+                        input.value.trim();
+
+
+                    if (!text) {
+
+                        return;
+
+                    }
+
+
+                    const monthKey =
+                        String(
+                            monthNumber
+                        );
+
+
+                    const dayKey =
+                        String(day);
+
+
+                    if (
+                        !events[
+                            monthKey
+                        ]
+                    ) {
+
+                        events[
+                            monthKey
+                        ] = {};
+
+                    }
+
+
+                    if (
+                        !events[
+                            monthKey
+                        ][dayKey]
+                    ) {
+
+                        events[
+                            monthKey
+                        ][dayKey] = [];
+
+                    }
+
+
+                    events[
+                        monthKey
+                    ][dayKey].push(
+                        text
+                    );
+
+
+                    saveEvents();
+
+
+                    closeModal();
+
+
+                    showMonth(
+                        monthName
+                    );
+
+                }
+            );
+
+
+        /* --------------------------------------------------------
+           Cancel
+           -------------------------------------------------------- */
+
+        document
+            .getElementById(
+                "cancelAdd"
+            )
+            .addEventListener(
+                "click",
+                closeModal
+            );
+
+
+        /* --------------------------------------------------------
+           Enter key
+           -------------------------------------------------------- */
+
+        input.addEventListener(
+            "keydown",
+            event => {
+
+                if (
+                    event.key ===
+                    "Enter"
+                ) {
+
+                    document
+                        .getElementById(
+                            "addEvent"
+                        )
+                        .click();
+
+                }
+
+
+                if (
+                    event.key ===
+                    "Escape"
+                ) {
+
+                    closeModal();
+
+                }
+
+            }
+        );
+
+    }
+
+
+    /* ============================================================
+       ASK BEFORE DELETE
+       ============================================================ */
+
+    function askDelete(
+        monthName,
+        day,
+        eventIndex
+    ) {
+
+        const monthKey =
+            String(
+                MONTHS[
+                    monthName
+                ]
+            );
+
+
+        const dayKey =
+            String(day);
+
+
+        const text =
+            events[
+                monthKey
+            ]?.[
+                dayKey
+            ]?.[
+                eventIndex
+            ];
+
+
+        if (
+            text ===
+            undefined
+        ) {
+
+            return;
+
+        }
+
+
+        modal.innerHTML = `
+
+            <h2>
+                Delete event?
+            </h2>
+
+
+            <div class="delete-message">
+
+                ${escapeHtml(text)}
+
+            </div>
+
+
+            <div class="modal-buttons">
+
+                <button
+                    class="delete-button"
+                    id="confirmDelete">
+
+                    Delete
+
+                </button>
+
+
+                <button
+                    class="cancel-button"
+                    id="cancelDelete">
+
+                    Cancel
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        modalBackground.classList.add(
+            "visible"
+        );
+
+
+        /* --------------------------------------------------------
+           Confirm deletion
+           -------------------------------------------------------- */
+
+        document
+            .getElementById(
+                "confirmDelete"
+            )
+            .addEventListener(
+                "click",
+                () => {
+
+                    const dayEvents =
+                        events[
+                            monthKey
+                        ]?.[
+                            dayKey
+                        ];
+
+
+                    if (!dayEvents) {
+
+                        return;
+
+                    }
+
+
+                    dayEvents.splice(
+                        eventIndex,
+                        1
+                    );
+
+
+                    /*
+                     * Remove empty day
+                     */
+
+                    if (
+                        dayEvents.length
+                        === 0
+                    ) {
+
+                        delete events[
+                            monthKey
+                        ][dayKey];
+
+                    }
+
+
+                    /*
+                     * Remove empty month
+                     */
+
+                    if (
+                        Object.keys(
+                            events[
+                                monthKey
+                            ] || {}
+                        ).length === 0
+                    ) {
+
+                        delete events[
+                            monthKey
+                        ];
+
+                    }
+
+
+                    saveEvents();
+
+
+                    closeModal();
+
+
+                    showMonth(
+                        monthName
+                    );
+
+                }
+            );
+
+
+        document
+            .getElementById(
+                "cancelDelete"
+            )
+            .addEventListener(
+                "click",
+                closeModal
+            );
+
+    }
+
+
+    /* ============================================================
+       CLOSE MODAL
+       ============================================================ */
+
+    function closeModal() {
+
+        modalBackground.classList.remove(
+            "visible"
+        );
+
+        modal.innerHTML = "";
+
+    }
+
+
+    /* ============================================================
+       CLICK OUTSIDE MODAL
+       ============================================================ */
+
+    modalBackground.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                modalBackground
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+    /* ============================================================
+       ESCAPE KEY
+       ============================================================ */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                "Escape"
+            ) {
+
+                closeModal();
+
+            }
+
+        }
+    );
+
+
+    /* ============================================================
+       HTML ESCAPING
+       ============================================================ */
+
+    function escapeHtml(
+        text
+    ) {
+
+        return String(text)
+
+            .replaceAll(
+                "&",
+                "&amp;"
+            )
+
+            .replaceAll(
+                "<",
+                "&lt;"
+            )
+
+            .replaceAll(
+                ">",
+                "&gt;"
+            )
+
+            .replaceAll(
+                '"',
+                "&quot;"
+            )
+
+            .replaceAll(
+                "'",
+                "&#039;"
+            );
+
+    }
+
+
+    /* ============================================================
+       START APP
+       ============================================================ */
+
+    showStart();
+
+</script>
+
+</body>
+
+</html>

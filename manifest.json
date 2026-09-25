@@ -1,0 +1,9 @@
+{
+    "name": "2026 Calendar",
+    "short_name": "Calendar 2026",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#674550",
+    "theme_color": "#674550",
+    "description": "My 2026 calendar"
+}
