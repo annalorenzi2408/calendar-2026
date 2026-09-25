@@ -1,1062 +1,1477 @@
 <!DOCTYPE html>
+
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    >
+```
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="2026 Calendar">
 
-    <meta
-        name="theme-color"
-        content="#674550"
-    >
+<link rel="manifest" href="manifest.json">
 
-    <meta
-        name="apple-mobile-web-app-capable"
-        content="yes"
-    >
+<title>2026 Calendar</title>
 
-    <meta
-        name="apple-mobile-web-app-status-bar-style"
-        content="default"
-    >
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <meta
-        name="apple-mobile-web-app-title"
-        content="2026 Calendar"
-    >
+<style>
+    @font-face {
+        font-family: "Bryndan";
+        src: url("BryndanWrite.ttf") format("truetype");
+    }
 
-    <title>2026 Calendar</title>
+    :root {
+        --blue: #9fb8d1;
+        --cream: #f0debd;
+        --maroon: #674550;
+        --dark: #111111;
+    }
 
-    <link
-        rel="manifest"
-        href="manifest.json"
-    >
+    * {
+        box-sizing: border-box;
+    }
 
-    <style>
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+    }
 
-        @font-face {
-            font-family: "BryndanWrite";
-            src: url("BryndanWrite.ttf") format("truetype");
-        }
+    body {
+        background: var(--blue);
+        font-family: "Bryndan", Arial, sans-serif;
+        color: var(--maroon);
+    }
 
+    button,
+    input {
+        font-family: inherit;
+    }
 
-        :root {
-            --maroon: #674550;
-            --cream: #F0DEBD;
-            --blue: #9BB7D4;
-        }
+    /* LOGIN */
 
+    #login-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        background: var(--blue);
+    }
 
-        * {
-            box-sizing: border-box;
-        }
+    .login-box {
+        width: min(90%, 420px);
+        background: var(--cream);
+        border-radius: 30px;
+        padding: 40px 30px;
+        text-align: center;
+    }
 
+    .login-box h1 {
+        margin: 0 0 25px;
+        font-size: 42px;
+        color: var(--maroon);
+    }
 
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            min-height: 100%;
-        }
+    .login-box input {
+        width: 100%;
+        border: 2px solid var(--maroon);
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 18px;
+        margin-bottom: 12px;
+        background: #fff8eb;
+        color: var(--maroon);
+    }
 
+    .login-box button {
+        width: 100%;
+        border: none;
+        border-radius: 12px;
+        padding: 14px;
+        background: var(--maroon);
+        color: var(--cream);
+        font-size: 20px;
+        cursor: pointer;
+    }
 
-        body {
-            background: var(--maroon);
-            font-family: "BryndanWrite", cursive;
-            overscroll-behavior-y: none;
-        }
+    #login-message {
+        min-height: 24px;
+        margin-top: 15px;
+        color: var(--maroon);
+    }
 
+    /* APP */
 
-        button,
-        input {
-            font-family: inherit;
-        }
+    #app {
+        display: none;
+        min-height: 100vh;
+    }
 
+    .screen {
+        width: 100%;
+    }
 
-        button {
-            -webkit-tap-highlight-color: transparent;
-        }
+    /* START SCREEN */
 
+    #start-screen {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+    }
 
-        /* =====================================================
-           APP
-           ===================================================== */
+    .start-content {
+        width: min(90%, 700px);
+        text-align: center;
+    }
 
-        #app {
-            width: 100%;
-            min-height: 100vh;
-            background: var(--maroon);
-        }
+    .start-image {
+        width: 100%;
+        max-width: 1080px;
+        display: block;
+        margin: 0 auto;
+    }
 
+    .month-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-top: 25px;
+    }
 
-        /* =====================================================
-           POSTER / START SCREEN
-           ===================================================== */
+    .month-button {
+        border: none;
+        background: var(--cream);
+        color: var(--maroon);
+        border-radius: 18px;
+        padding: 14px 25px;
+        font-size: 24px;
+        cursor: pointer;
+    }
 
-        .poster {
-            position: relative;
-            width: 100%;
-            max-width: 1080px;
-            margin: 0 auto;
-            aspect-ratio: 9 / 16;
-            background-size: 100% 100%;
-            background-repeat: no-repeat;
-            overflow: hidden;
-        }
+    /* MONTH SCREEN */
 
+    #month-screen {
+        display: none;
+        width: 100%;
+    }
 
-        .start {
-            background-image: url("start.png");
-        }
+    .month-page {
+        width: 100%;
+    }
 
+    /*
+     * The calendar image is 1080 x 1920.
+     * The invisible date buttons and event indicators
+     * are positioned using that exact coordinate system.
+     */
+    .calendar-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 1080px;
+        margin: 0 auto;
+    }
 
-        .click-area {
-            position: absolute;
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            cursor: pointer;
-        }
+    .calendar-image {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
 
+    .date-button {
+        position: absolute;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        cursor: pointer;
+        z-index: 3;
+    }
 
-        .month-button {
-            width: 70%;
-            height: 18%;
-            left: 15%;
-        }
+    /*
+     * Small maroon mark showing that a day has an event.
+     *
+     * This is based directly on the supplied reference image:
+     * - slightly inset from the cell's left/right edges
+     * - around 40% down from the top of the date cell
+     * - approximately 25px tall in the original 1080x1920 image
+     */
+    .event-indicator {
+        position: absolute;
+        background: var(--maroon);
+        border-radius: 6px;
+        pointer-events: none;
+        z-index: 2;
+    }
 
+    /* EVENTS */
 
-        .october-button {
-            top: 30%;
-        }
+    .events-area {
+        width: 100%;
+        background: var(--blue);
+        padding: 50px 0 70px;
+    }
 
+    .events-list {
+        width: min(88%, 820px);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
 
-        .november-button {
-            top: 50%;
-        }
+    .event-card {
+        width: 100%;
+        min-height: 145px;
+        background: var(--cream);
+        border-radius: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 25px 35px;
+        text-align: center;
+        color: var(--dark);
+        font-size: 32px;
+        line-height: 1.2;
+        user-select: none;
+    }
 
+    .event-card small {
+        display: block;
+        font-size: inherit;
+    }
 
-        .december-button {
-            top: 70%;
-        }
+    /* LOGOUT */
 
+    .logout-button {
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 20;
+        border: none;
+        border-radius: 12px;
+        padding: 9px 14px;
+        background: var(--cream);
+        color: var(--maroon);
+        font-family: inherit;
+        font-size: 16px;
+        cursor: pointer;
+    }
 
-        /* =====================================================
-           MONTH SCREEN
-           ===================================================== */
+    /* MODAL */
 
-        .month-image-container {
-            position: relative;
-            width: 100%;
-            max-width: 1080px;
-            margin: 0 auto;
-        }
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        z-index: 50;
+    }
 
+    .modal {
+        width: min(92%, 500px);
+        background: var(--cream);
+        border-radius: 28px;
+        padding: 30px;
+        text-align: center;
+    }
 
-        .month-image {
-            display: block;
-            width: 100%;
-            height: auto;
-        }
+    .modal h2 {
+        margin: 0 0 20px;
+        color: var(--maroon);
+        font-size: 32px;
+    }
 
+    .modal input {
+        width: 100%;
+        border: 2px solid var(--maroon);
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 20px;
+        background: #fff8eb;
+        color: var(--maroon);
+    }
 
-        .day-button {
-            position: absolute;
-            border: none;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            cursor: pointer;
-            z-index: 3;
-        }
+    .modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 20px;
+    }
 
+    .modal-buttons button {
+        border: none;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 18px;
+        cursor: pointer;
+    }
 
-        .back-button {
-            top: 1.5%;
-            left: 2%;
-            width: 12%;
-            height: 7%;
-            z-index: 5;
-        }
+    .save-button {
+        background: var(--maroon);
+        color: var(--cream);
+    }
 
+    .cancel-button {
+        background: #d8c3a3;
+        color: var(--maroon);
+    }
 
-        /* =====================================================
-           EVENT INDICATOR
-           ===================================================== */
+    /* MOBILE */
 
-        .event-indicator {
-            position: absolute;
-            background: var(--cream);
-            border: 2px solid var(--maroon);
-            border-radius: 6px;
-            pointer-events: none;
-            z-index: 2;
-        }
-
-
-        /* =====================================================
-           EVENTS AREA
-           ===================================================== */
-
+    @media (max-width: 600px) {
         .events-area {
-            width: 100%;
-            background: var(--blue);
-            padding: 50px 0 70px;
+            padding-top: 35px;
+            padding-bottom: 50px;
         }
-
 
         .events-list {
-            width: min(88%, 820px);
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
+            width: 90%;
+            gap: 20px;
         }
-
 
         .event-card {
-            width: 100%;
-            min-height: 110px;
-            background: var(--cream);
-            border: 3px solid var(--maroon);
-            border-radius: 22px;
-            color: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 30px 25px;
-            font-size: 28px;
-            line-height: 1.25;
-            cursor: pointer;
-            user-select: none;
-            -webkit-user-select: none;
+            min-height: 120px;
+            border-radius: 30px;
+            padding: 20px;
+            font-size: 25px;
         }
-
-
-        .event-card::after {
-            content: "Double-click / double-tap to delete";
-            display: block;
-            font-family: sans-serif;
-            font-size: 11px;
-            opacity: 0.45;
-            margin-left: 12px;
-        }
-
-
-        /* =====================================================
-           LOGIN
-           ===================================================== */
-
-        .login-screen {
-            width: 100%;
-            min-height: 100vh;
-            background: var(--maroon);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-        }
-
-
-        .login-box {
-            width: min(90%, 500px);
-            background: var(--cream);
-            border: 3px solid var(--maroon);
-            border-radius: 28px;
-            padding: 45px 35px;
-            text-align: center;
-        }
-
-
-        .login-box h1 {
-            margin: 0 0 10px;
-            font-size: 42px;
-            color: var(--maroon);
-        }
-
-
-        .login-box p {
-            margin: 0 0 30px;
-            font-size: 24px;
-            color: #000;
-        }
-
-
-        .login-box input {
-            display: block;
-            width: 100%;
-            margin: 12px 0;
-            padding: 15px 18px;
-            border: 2px solid var(--maroon);
-            border-radius: 14px;
-            background: white;
-            color: #000;
-            font-family: sans-serif;
-            font-size: 16px;
-        }
-
-
-        .login-button {
-            width: 100%;
-            margin-top: 15px;
-            padding: 15px;
-            border: none;
-            border-radius: 14px;
-            background: var(--maroon);
-            color: var(--cream);
-            font-family: inherit;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-
-        .login-error {
-            display: none;
-            margin-top: 18px;
-            color: #8b0000;
-            font-family: sans-serif;
-            font-size: 14px;
-        }
-
-
-        /* =====================================================
-           LOGOUT
-           ===================================================== */
 
         .logout-button {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 100;
-            border: 2px solid var(--cream);
-            border-radius: 12px;
-            background: var(--maroon);
-            color: var(--cream);
-            padding: 8px 14px;
-            font-family: inherit;
-            font-size: 17px;
-            cursor: pointer;
+            font-size: 14px;
+            padding: 7px 11px;
         }
 
-
-        /* =====================================================
-           MODAL
-           ===================================================== */
-
-        .modal-background {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.55);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 25px;
-            z-index: 1000;
+        .login-box h1 {
+            font-size: 34px;
         }
-
-
-        .modal-background.visible {
-            display: flex;
-        }
-
-
-        .modal {
-            width: min(90%, 520px);
-            background: var(--cream);
-            border: 3px solid var(--maroon);
-            border-radius: 25px;
-            padding: 30px;
-            text-align: center;
-        }
-
-
-        .modal h2 {
-            margin-top: 0;
-            color: var(--maroon);
-            font-size: 32px;
-        }
-
-
-        .modal input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid var(--maroon);
-            border-radius: 12px;
-            font-family: sans-serif;
-            font-size: 17px;
-        }
-
-
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 22px;
-        }
-
-
-        .modal-buttons button {
-            border: none;
-            border-radius: 12px;
-            padding: 12px 22px;
-            font-family: inherit;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-
-        .add-button {
-            background: var(--maroon);
-            color: var(--cream);
-        }
-
-
-        .cancel-button {
-            background: var(--blue);
-            color: #000;
-        }
-
-
-        .delete-button {
-            background: #8b0000;
-            color: white;
-        }
-
-
-        .delete-message {
-            font-family: sans-serif;
-            font-size: 17px;
-            margin: 20px 0;
-            word-break: break-word;
-        }
-
-
-        /* =====================================================
-           MOBILE
-           ===================================================== */
-
-        @media (max-width: 600px) {
-
-            .events-area {
-                padding-top: 35px;
-                padding-bottom: 50px;
-            }
-
-
-            .events-list {
-                width: 90%;
-                gap: 20px;
-            }
-
-
-            .event-card {
-                min-height: 100px;
-                padding: 25px 18px;
-                font-size: 22px;
-            }
-
-
-            .event-card::after {
-                font-size: 9px;
-            }
-
-
-            .login-box {
-                padding: 35px 25px;
-            }
-
-
-            .login-box h1 {
-                font-size: 34px;
-            }
-
-
-            .login-box p {
-                font-size: 21px;
-            }
-
-
-            .logout-button {
-                top: 10px;
-                right: 10px;
-                font-size: 15px;
-                padding: 7px 11px;
-            }
-
-
-            .modal {
-                padding: 25px 20px;
-            }
-
-        }
-
-    </style>
-
-
-    <!-- Supabase -->
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    }
+</style>
+```
 
 </head>
 
-
 <body>
 
-    <div id="app"></div>
+```
+<!-- LOGIN -->
+
+<div id="login-screen">
+    <div class="login-box">
+        <h1>2026 Calendar</h1>
+
+        <input
+            id="email"
+            type="email"
+            placeholder="Email"
+            autocomplete="email"
+        >
+
+        <input
+            id="password"
+            type="password"
+            placeholder="Password"
+            autocomplete="current-password"
+        >
+
+        <button id="login-button">Log in</button>
+
+        <div id="login-message"></div>
+    </div>
+</div>
 
 
-    <!-- =====================================================
-         MODAL
-         ===================================================== -->
+<!-- APP -->
+
+<div id="app">
+
+    <button
+        id="logout-button"
+        class="logout-button"
+    >
+        Log out
+    </button>
+
+
+    <!-- START SCREEN -->
 
     <div
-        class="modal-background"
-        id="modalBackground"
+        id="start-screen"
+        class="screen"
     >
+        <div class="start-content">
 
-        <div
-            class="modal"
-            id="modal"
-        ></div>
+            <img
+                src="start.png"
+                class="start-image"
+                alt="2026 Calendar"
+            >
 
+            <div class="month-buttons">
+
+                <button
+                    class="month-button"
+                    data-month="10"
+                >
+                    October
+                </button>
+
+                <button
+                    class="month-button"
+                    data-month="11"
+                >
+                    November
+                </button>
+
+                <button
+                    class="month-button"
+                    data-month="12"
+                >
+                    December
+                </button>
+
+            </div>
+
+        </div>
     </div>
 
 
-    <script>
+    <!-- MONTH SCREEN -->
 
-        /* =====================================================
-           SUPABASE CONNECTION
-           ===================================================== */
+    <div
+        id="month-screen"
+        class="screen"
+    >
 
-        const SUPABASE_URL =
-            "https://yfsshafcznyaavxpcopm.supabase.co";
+        <div class="month-page">
 
-
-        /*
-            IMPORTANT:
-
-            Paste your existing Supabase
-            Publishable / anon key here.
-
-            Do NOT use the service_role / secret key.
-        */
-
-        const SUPABASE_KEY =
-            "sb_publishable_HiSngqkznKGRf4fV1tZc4g_CWfoTakE";
+            <div
+                id="calendar-wrapper"
+                class="calendar-wrapper"
+            >
+                <img
+                    id="calendar-image"
+                    class="calendar-image"
+                    alt="Calendar"
+                >
+            </div>
 
 
-        const supabaseClient =
-            window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY
-            );
+            <div class="events-area">
+
+                <div
+                    id="events-list"
+                    class="events-list"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 
-        /* =====================================================
-           SETTINGS
-           ===================================================== */
+<!-- ADD EVENT MODAL -->
 
-        const YEAR = 2026;
+<div
+    id="event-modal"
+    class="modal-overlay"
+>
+    <div class="modal">
 
+        <h2 id="modal-title">
+            Add event
+        </h2>
 
-        const MONTHS = {
-            october: 10,
-            november: 11,
-            december: 12
-        };
+        <input
+            id="event-text"
+            type="text"
+            placeholder="What are you doing?"
+            autocomplete="off"
+        >
 
+        <div class="modal-buttons">
 
-        const MONTH_NAMES = {
-            10: "October",
-            11: "November",
-            12: "December"
-        };
+            <button
+                id="cancel-button"
+                class="cancel-button"
+            >
+                Cancel
+            </button>
 
+            <button
+                id="save-button"
+                class="save-button"
+            >
+                Save
+            </button>
 
-        /* =====================================================
-           APP STATE
-           ===================================================== */
+        </div>
 
-        let events = {};
-
-        let currentMonth = null;
-
-        let currentUser = null;
-
-        let calendarId = null;
-
-
-        const app =
-            document.getElementById("app");
-
-
-        const modalBackground =
-            document.getElementById(
-                "modalBackground"
-            );
+    </div>
+</div>
 
 
-        const modal =
-            document.getElementById("modal");
+<script>
+    /* =========================
+       SUPABASE
+    ========================= */
+
+    const SUPABASE_URL =
+        "https://yfsshafcznyaavxpcopm.supabase.co";
+
+    /*
+     * Paste your existing Supabase PUBLISHABLE key here.
+     * Do NOT use the service_role/secret key.
+     */
+    const SUPABASE_KEY =
+        "sb_publishable_HiSngqkznKGRf4fV1tZc4g_CWfoTakE";
+
+    const supabaseClient =
+        window.supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_KEY
+        );
 
 
-        /* =====================================================
-           AUTHENTICATION
-           ===================================================== */
+    /* =========================
+       APP STATE
+    ========================= */
 
-        async function checkLogin() {
+    let currentCalendar = null;
+    let currentMonth = null;
+    let selectedDay = null;
 
-            const {
-                data,
-                error
-            } =
-                await supabaseClient.auth.getSession();
+    /*
+     * Events are kept in this format:
+     *
+     * {
+     *   "10": {
+     *      "20": [
+     *          {
+     *              id: "...",
+     *              text: "do this"
+     *          }
+     *      ]
+     *   }
+     * }
+     */
+
+    let events = {};
 
 
-            if (error) {
+    /* =========================
+       ELEMENTS
+    ========================= */
 
-                console.error(error);
+    const loginScreen =
+        document.getElementById("login-screen");
 
-                showLogin();
+    const app =
+        document.getElementById("app");
 
-                return;
-            }
+    const emailInput =
+        document.getElementById("email");
+
+    const passwordInput =
+        document.getElementById("password");
+
+    const loginButton =
+        document.getElementById("login-button");
+
+    const loginMessage =
+        document.getElementById("login-message");
+
+    const startScreen =
+        document.getElementById("start-screen");
+
+    const monthScreen =
+        document.getElementById("month-screen");
+
+    const calendarWrapper =
+        document.getElementById("calendar-wrapper");
+
+    const calendarImage =
+        document.getElementById("calendar-image");
+
+    const eventsList =
+        document.getElementById("events-list");
+
+    const eventModal =
+        document.getElementById("event-modal");
+
+    const eventText =
+        document.getElementById("event-text");
+
+    const modalTitle =
+        document.getElementById("modal-title");
+
+    const saveButton =
+        document.getElementById("save-button");
+
+    const cancelButton =
+        document.getElementById("cancel-button");
+
+    const logoutButton =
+        document.getElementById("logout-button");
 
 
-            currentUser =
-                data.session?.user || null;
+    /* =========================
+       MONTH DATA
+    ========================= */
+
+    const monthNames = {
+        10: "October",
+        11: "November",
+        12: "December"
+    };
+
+    const monthImages = {
+        10: "october.png",
+        11: "november.png",
+        12: "december.png"
+    };
 
 
-            if (currentUser) {
+    /*
+     * Calendar positions for the 1080 x 1920
+     * Canva images.
+     *
+     * The calendar grid is:
+     *
+     * left = 112
+     * top = 358
+     * width = 876
+     * height = 667
+     */
 
-                await startCalendar();
+    const CALENDAR_WIDTH = 1080;
+    const CALENDAR_HEIGHT = 1920;
 
-            } else {
+    const GRID_LEFT = 112;
+    const GRID_TOP = 358;
+    const GRID_WIDTH = 876;
+    const GRID_HEIGHT = 667;
 
-                showLogin();
+    const cellWidth =
+        GRID_WIDTH / 7;
 
+    const cellHeight =
+        GRID_HEIGHT / 6;
+
+
+    /* =========================
+       LOGIN
+    ========================= */
+
+    loginButton.addEventListener(
+        "click",
+        login
+    );
+
+    passwordInput.addEventListener(
+        "keydown",
+        function(event) {
+            if (event.key === "Enter") {
+                login();
             }
         }
+    );
 
 
-        async function login() {
+    async function login() {
 
-            const email =
-                document
-                    .getElementById(
-                        "loginEmail"
-                    )
-                    .value
-                    .trim();
+        loginMessage.textContent =
+            "Logging in...";
+
+        const email =
+            emailInput.value.trim();
+
+        const password =
+            passwordInput.value;
+
+        const {
+            error
+        } =
+            await supabaseClient.auth.signInWithPassword({
+                email,
+                password
+            });
+
+        if (error) {
+
+            loginMessage.textContent =
+                error.message;
+
+            return;
+        }
+
+        loginMessage.textContent = "";
+
+        await startApp();
+    }
 
 
-            const password =
-                document
-                    .getElementById(
-                        "loginPassword"
-                    )
-                    .value;
+    async function startApp() {
 
+        loginScreen.style.display =
+            "none";
 
-            const errorBox =
-                document
-                    .getElementById(
-                        "loginError"
-                    );
+        app.style.display =
+            "block";
 
+        await findCalendar();
 
-            errorBox.style.display =
+        if (currentCalendar) {
+
+            startScreen.style.display =
+                "flex";
+
+            monthScreen.style.display =
                 "none";
+        }
+    }
 
 
-            if (!email || !password) {
+    /* =========================
+       FIND CALENDAR
+    ========================= */
 
-                errorBox.textContent =
-                    "Please enter your email and password.";
+    async function findCalendar() {
 
-                errorBox.style.display =
-                    "block";
-
-                return;
+        const {
+            data: {
+                user
             }
+        } =
+            await supabaseClient.auth.getUser();
 
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient.auth
-                    .signInWithPassword({
-
-                        email,
-                        password
-
-                    });
-
-
-            if (error) {
-
-                console.error(error);
-
-                errorBox.textContent =
-                    "Incorrect email or password.";
-
-                errorBox.style.display =
-                    "block";
-
-                return;
-            }
-
-
-            currentUser =
-                data.user;
-
-
-            await startCalendar();
+        if (!user) {
+            return;
         }
 
-
-        async function logout() {
-
-            await supabaseClient.auth.signOut();
-
-            currentUser = null;
-
-            calendarId = null;
-
-            events = {};
-
-            showLogin();
-        }
-
-
-        /* =====================================================
-           LOGIN SCREEN
-           ===================================================== */
-
-        function showLogin() {
-
-            app.innerHTML = `
-
-                <section class="login-screen">
-
-                    <div class="login-box">
-
-                        <h1>
-                            2026 Calendar
-                        </h1>
-
-                        <p>
-                            Sign in to continue
-                        </p>
-
-                        <input
-                            id="loginEmail"
-                            type="email"
-                            placeholder="Email"
-                            autocomplete="email"
-                        >
-
-                        <input
-                            id="loginPassword"
-                            type="password"
-                            placeholder="Password"
-                            autocomplete="current-password"
-                        >
-
-                        <button
-                            class="login-button"
-                            id="loginButton"
-                        >
-                            Log in
-                        </button>
-
-                        <div
-                            id="loginError"
-                            class="login-error"
-                        ></div>
-
-                    </div>
-
-                </section>
-            `;
-
-
-            document
-                .getElementById(
-                    "loginButton"
-                )
-                .addEventListener(
-                    "click",
-                    login
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("calendar_members")
+                .select(`
+                    calendar_id,
+                    calendars (
+                        id,
+                        name
+                    )
+                `)
+                .eq(
+                    "user_id",
+                    user.id
                 );
 
+        if (error) {
 
-            document
-                .getElementById(
-                    "loginPassword"
+            console.error(error);
+
+            alert(
+                "Could not load the calendar."
+            );
+
+            return;
+        }
+
+        if (!data || data.length === 0) {
+
+            alert(
+                "You are not a member of a calendar yet."
+            );
+
+            return;
+        }
+
+        currentCalendar =
+            data[0].calendars;
+    }
+
+
+    /* =========================
+       MONTH BUTTONS
+    ========================= */
+
+    document
+        .querySelectorAll(".month-button")
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    const month =
+                        Number(
+                            this.dataset.month
+                        );
+
+                    showMonth(month);
+                }
+            );
+        });
+
+
+    /* =========================
+       SHOW MONTH
+    ========================= */
+
+    async function showMonth(monthNumber) {
+
+        currentMonth =
+            monthNumber;
+
+        startScreen.style.display =
+            "none";
+
+        monthScreen.style.display =
+            "block";
+
+        calendarImage.src =
+            monthImages[monthNumber];
+
+        await loadEvents(monthNumber);
+
+        renderCalendarButtons();
+
+        renderEvents();
+    }
+
+
+    /* =========================
+       LOAD EVENTS
+    ========================= */
+
+    async function loadEvents(monthNumber) {
+
+        if (!currentCalendar) {
+            return;
+        }
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("events")
+                .select("*")
+                .eq(
+                    "calendar_id",
+                    currentCalendar.id
                 )
-                .addEventListener(
-                    "keydown",
-                    event => {
-
-                        if (
-                            event.key ===
-                            "Enter"
-                        ) {
-
-                            login();
-
-                        }
-
+                .eq(
+                    "year",
+                    2026
+                )
+                .eq(
+                    "month",
+                    monthNumber
+                )
+                .order(
+                    "created_at",
+                    {
+                        ascending: true
                     }
                 );
+
+        if (error) {
+
+            console.error(error);
+
+            alert(
+                "Could not load events."
+            );
+
+            return;
         }
 
+        events = {};
 
-        /* =====================================================
-           START CALENDAR
-           ===================================================== */
+        data.forEach(event => {
 
-        async function startCalendar() {
-
-            const found =
-                await findCalendar();
-
-
-            if (!found) {
-                return;
+            if (!events[event.month]) {
+                events[event.month] = {};
             }
 
-
-            await loadEvents();
-
-            showStart();
-        }
-
-
-        /* =====================================================
-           FIND CALENDAR
-           ===================================================== */
-
-        async function findCalendar() {
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from("calendar_members")
-                    .select(`
-                        calendar_id,
-                        calendars (
-                            id,
-                            name
-                        )
-                    `)
-                    .eq(
-                        "user_id",
-                        currentUser.id
-                    );
-
-
-            if (error) {
-
-                console.error(error);
-
-                alert(
-                    "Could not find your calendar."
-                );
-
-                return false;
+            if (!events[event.month][event.day]) {
+                events[event.month][event.day] = [];
             }
 
-
-            if (
-                !data ||
-                data.length === 0
-            ) {
-
-                alert(
-                    "Your account is not connected to a calendar yet."
-                );
-
-                return false;
-            }
-
-
-            calendarId =
-                data[0].calendar_id;
-
-
-            return true;
-        }
-
-
-        /* =====================================================
-           LOAD EVENTS
-           ===================================================== */
-
-        async function loadEvents() {
-
-            if (!calendarId) {
-                return;
-            }
-
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from("events")
-                    .select("*")
-                    .eq(
-                        "calendar_id",
-                        calendarId
-                    )
-                    .eq(
-                        "year",
-                        YEAR
-                    )
-                    .order(
-                        "month",
-                        {
-                            ascending: true
-                        }
-                    )
-                    .order(
-                        "day",
-                        {
-                            ascending: true
-                        }
-                    );
-
-
-            if (error) {
-
-                console.error(error);
-
-                alert(
-                    "Could not load calendar events."
-                );
-
-                return;
-            }
-
-
-            events = {};
-
-
-            data.forEach(event => {
-
-                const monthKey =
-                    String(event.month);
-
-
-                const dayKey =
-                    String(event.day);
-
-
-                if (
-                    !events[monthKey]
-                ) {
-
-                    events[monthKey] = {};
-
-                }
-
-
-                if (
-                    !events[monthKey][dayKey]
-                ) {
-
-                    events[
-                        monthKey
-                    ][dayKey] = [];
-
-                }
-
-
-                events[
-                    monthKey
-                ][dayKey].push({
-
-                    id: event.id,
-
-                    text: event.text
-
-                });
-
+            events[event.month][event.day].push({
+                id: event.id,
+                text: event.text
             });
-        }
+        });
+    }
 
 
-        /* =====================================================
-           ADD EVENT
-           ===================================================== */
+    /* =========================
+       CALENDAR BUTTONS
+    ========================= */
 
-        async function addEvent(
-            monthNumber,
-            day,
-            text
+    function renderCalendarButtons() {
+
+        /*
+         * Remove old date buttons and indicators.
+         */
+
+        calendarWrapper
+            .querySelectorAll(
+                ".date-button, .event-indicator"
+            )
+            .forEach(element => {
+                element.remove();
+            });
+
+
+        const firstDay =
+            new Date(
+                2026,
+                currentMonth - 1,
+                1
+            ).getDay();
+
+        /*
+         * Convert JavaScript Sunday-first
+         * numbering into Monday-first.
+         */
+        const mondayFirstOffset =
+            (firstDay + 6) % 7;
+
+        const daysInMonth =
+            new Date(
+                2026,
+                currentMonth,
+                0
+            ).getDate();
+
+
+        for (
+            let day = 1;
+            day <= daysInMonth;
+            day++
         ) {
 
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from("events")
-                    .insert({
+            const index =
+                mondayFirstOffset +
+                day -
+                1;
 
-                        calendar_id:
-                            calendarId,
-
-                        year:
-                            YEAR,
-
-                        month:
-                            monthNumber,
-
-                        day:
-                            day,
-
-                        text:
-                            text
-
-                    });
-
-
-            if (error) {
-
-                console.error(error);
-
-                alert(
-                    "Could not save the event."
+            const row =
+                Math.floor(
+                    index / 7
                 );
 
-                return false;
+            const column =
+                index % 7;
+
+
+            const left =
+                GRID_LEFT +
+                column * cellWidth;
+
+            const top =
+                GRID_TOP +
+                (row + 1) * cellHeight;
+
+
+            /*
+             * Invisible clickable date button.
+             */
+
+            const button =
+                document.createElement("button");
+
+            button.className =
+                "date-button";
+
+            button.setAttribute(
+                "aria-label",
+                `${day}, ${monthNames[currentMonth]}`
+            );
+
+            button.style.left =
+                (
+                    left /
+                    CALENDAR_WIDTH *
+                    100
+                ) + "%";
+
+            button.style.top =
+                (
+                    top /
+                    CALENDAR_HEIGHT *
+                    100
+                ) + "%";
+
+            button.style.width =
+                (
+                    cellWidth /
+                    CALENDAR_WIDTH *
+                    100
+                ) + "%";
+
+            button.style.height =
+                (
+                    cellHeight /
+                    CALENDAR_HEIGHT *
+                    100
+                ) + "%";
+
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    openAddEvent(
+                        day
+                    );
+                }
+            );
+
+
+            /*
+             * Double-click deletes an event.
+             */
+
+            let clickTimer = null;
+
+            button.addEventListener(
+                "dblclick",
+                function(event) {
+
+                    event.preventDefault();
+
+                    deleteDayEvent(
+                        day
+                    );
+                }
+            );
+
+
+            /*
+             * Mobile double-tap support.
+             */
+
+            button.addEventListener(
+                "touchend",
+                function(event) {
+
+                    const now =
+                        Date.now();
+
+                    const lastTap =
+                        Number(
+                            button.dataset.lastTap || 0
+                        );
+
+                    if (
+                        now - lastTap <
+                        350
+                    ) {
+
+                        event.preventDefault();
+
+                        deleteDayEvent(
+                            day
+                        );
+
+                        button.dataset.lastTap =
+                            "0";
+
+                    } else {
+
+                        button.dataset.lastTap =
+                            String(now);
+                    }
+                },
+                {
+                    passive: false
+                }
+            );
+
+
+            calendarWrapper.appendChild(
+                button
+            );
+
+
+            /*
+             * EVENT INDICATOR
+             *
+             * This is the important change.
+             *
+             * Reference screenshot:
+             *
+             * Rectangle:
+             * x ≈ 241
+             * y ≈ 847
+             * width ≈ 116
+             * height ≈ 25
+             *
+             * For a calendar cell this means:
+             * - 6px inset from left
+             * - 6px inset from right
+             * - around 40% down the cell
+             */
+
+            const dayEvents =
+                events[
+                    String(currentMonth)
+                ]?.[
+                    String(day)
+                ] || [];
+
+
+            if (dayEvents.length > 0) {
+
+                const indicator =
+                    document.createElement("div");
+
+                indicator.className =
+                    "event-indicator";
+
+
+                /*
+                 * Horizontal placement:
+                 * approximately 6px inside
+                 * each side of the date cell.
+                 */
+
+                const indicatorInset =
+                    6;
+
+                indicator.style.left =
+                    (
+                        (
+                            left +
+                            indicatorInset
+                        ) /
+                        CALENDAR_WIDTH *
+                        100
+                    ) + "%";
+
+
+                /*
+                 * Vertical placement:
+                 * approximately 40% down
+                 * the date cell.
+                 */
+
+                indicator.style.top =
+                    (
+                        (
+                            top +
+                            cellHeight * 0.40
+                        ) /
+                        CALENDAR_HEIGHT *
+                        100
+                    ) + "%";
+
+
+                indicator.style.width =
+                    (
+                        (
+                            cellWidth -
+                            indicatorInset * 2
+                        ) /
+                        CALENDAR_WIDTH *
+                        100
+                    ) + "%";
+
+
+                /*
+                 * 25px in the original
+                 * 1080 x 1920 image.
+                 */
+
+                indicator.style.height =
+                    (
+                        25 /
+                        CALENDAR_HEIGHT *
+                        100
+                    ) + "%";
+
+
+                calendarWrapper.appendChild(
+                    indicator
+                );
             }
+        }
+    }
 
 
-            return true;
+    /* =========================
+       RENDER EVENTS
+    ========================= */
+
+    function renderEvents() {
+
+        eventsList.innerHTML = "";
+
+        if (!events[currentMonth]) {
+            return;
         }
 
 
-        /* =====================================================
-           DELETE EVENT
-           ===================================================== */
+        const monthEvents =
+            events[currentMonth];
 
-        async function deleteEvent(
-            eventId
+
+        const days =
+            Object.keys(
+                monthEvents
+            )
+            .map(Number)
+            .sort(
+                (a, b) => a - b
+            );
+
+
+        days.forEach(day => {
+
+            monthEvents[day].forEach(
+                event => {
+
+                    const card =
+                        document.createElement(
+                            "div"
+                        );
+
+                    card.className =
+                        "event-card";
+
+                    card.textContent =
+                        `${day}, ${monthNames[currentMonth]} - ${event.text}`;
+
+                    eventsList.appendChild(
+                        card
+                    );
+                }
+            );
+        });
+    }
+
+
+    /* =========================
+       ADD EVENT
+    ========================= */
+
+    function openAddEvent(day) {
+
+        selectedDay =
+            day;
+
+        modalTitle.textContent =
+            `${day}, ${monthNames[currentMonth]}`;
+
+        eventText.value =
+            "";
+
+        eventModal.style.display =
+            "flex";
+
+        setTimeout(
+            () => eventText.focus(),
+            50
+        );
+    }
+
+
+    cancelButton.addEventListener(
+        "click",
+        closeModal
+    );
+
+
+    eventModal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target ===
+                eventModal
+            ) {
+                closeModal();
+            }
+        }
+    );
+
+
+    eventText.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Enter") {
+
+                event.preventDefault();
+
+                saveEvent();
+            }
+        }
+    );
+
+
+    saveButton.addEventListener(
+        "click",
+        saveEvent
+    );
+
+
+    function closeModal() {
+
+        eventModal.style.display =
+            "none";
+
+        eventText.value =
+            "";
+
+        selectedDay =
+            null;
+    }
+
+
+    async function saveEvent() {
+
+        const text =
+            eventText.value.trim();
+
+        if (!text) {
+            return;
+        }
+
+        if (!currentCalendar) {
+            return;
+        }
+
+        saveButton.disabled =
+            true;
+
+
+        const {
+            data,
+            error
+        } =
+            await supabaseClient
+                .from("events")
+                .insert({
+                    calendar_id:
+                        currentCalendar.id,
+
+                    year:
+                        2026,
+
+                    month:
+                        currentMonth,
+
+                    day:
+                        selectedDay,
+
+                    text:
+                        text
+                })
+                .select()
+                .single();
+
+
+        saveButton.disabled =
+            false;
+
+
+        if (error) {
+
+            console.error(error);
+
+            alert(
+                "Could not save the event."
+            );
+
+            return;
+        }
+
+
+        if (!events[currentMonth]) {
+            events[currentMonth] = {};
+        }
+
+        if (!events[currentMonth][selectedDay]) {
+            events[currentMonth][selectedDay] = [];
+        }
+
+
+        events[currentMonth][selectedDay].push({
+            id: data.id,
+            text: data.text
+        });
+
+
+        closeModal();
+
+        renderCalendarButtons();
+
+        renderEvents();
+    }
+
+
+    /* =========================
+       DELETE EVENT
+    ========================= */
+
+    async function deleteDayEvent(day) {
+
+        const dayEvents =
+            events[
+                currentMonth
+            ]?.[
+                day
+            ] || [];
+
+
+        if (dayEvents.length === 0) {
+            return;
+        }
+
+
+        let message;
+
+        if (dayEvents.length === 1) {
+
+            message =
+                `Delete "${dayEvents[0].text}"?`;
+
+        } else {
+
+            message =
+                `Delete all ${dayEvents.length} events on ${day}, ${monthNames[currentMonth]}?`;
+        }
+
+
+        const confirmed =
+            confirm(message);
+
+
+        if (!confirmed) {
+            return;
+        }
+
+
+        for (
+            const event of dayEvents
         ) {
 
             const {
@@ -1067,9 +1482,8 @@
                     .delete()
                     .eq(
                         "id",
-                        eventId
+                        event.id
                     );
-
 
             if (error) {
 
@@ -1079,970 +1493,113 @@
                     "Could not delete the event."
                 );
 
-                return false;
+                return;
             }
-
-
-            return true;
         }
 
 
-        /* =====================================================
-           START SCREEN
-           ===================================================== */
-
-        function showStart() {
-
-            currentMonth = null;
+        delete events[
+            currentMonth
+        ][day];
 
 
-            app.innerHTML = `
-
-                <button
-                    class="logout-button"
-                    id="logoutButton"
-                >
-                    Log out
-                </button>
-
-
-                <section
-                    class="poster start"
-                >
-
-                    <button
-                        class="click-area month-button october-button"
-                        data-month="october"
-                    ></button>
-
-
-                    <button
-                        class="click-area month-button november-button"
-                        data-month="november"
-                    ></button>
-
-
-                    <button
-                        class="click-area month-button december-button"
-                        data-month="december"
-                    ></button>
-
-                </section>
-
-            `;
-
-
-            document
-                .querySelectorAll(
-                    "[data-month]"
-                )
-                .forEach(button => {
-
-                    button.addEventListener(
-                        "click",
-                        () => {
-
-                            showMonth(
-                                button.dataset.month
-                            );
-
-                        }
-                    );
-
-                });
-
-
-            document
-                .getElementById(
-                    "logoutButton"
-                )
-                .addEventListener(
-                    "click",
-                    logout
-                );
-
-
-            window.scrollTo(
-                0,
-                0
-            );
-        }
-
-
-        /* =====================================================
-           CALENDAR CALCULATIONS
-           ===================================================== */
-
-        function daysInMonth(month) {
-
-            return new Date(
-                YEAR,
-                month,
-                0
-            ).getDate();
-        }
-
-
-        function mondayIndex(date) {
-
-            const day =
-                date.getDay();
-
-
-            return (
-                (day + 6) % 7
-            );
-        }
-
-
-        function getDayPosition(
-            month,
-            day
+        if (
+            Object.keys(
+                events[currentMonth]
+            ).length === 0
         ) {
 
-            const firstDay =
-                new Date(
-                    YEAR,
-                    month - 1,
-                    1
-                );
-
-
-            const offset =
-                mondayIndex(
-                    firstDay
-                );
-
-
-            const index =
-                offset + day - 1;
-
-
-            return {
-
-                row:
-                    Math.floor(
-                        index / 7
-                    ),
-
-                column:
-                    index % 7
-
-            };
+            delete events[
+                currentMonth
+            ];
         }
 
 
-        /* =====================================================
-           MONTH SCREEN
-           ===================================================== */
+        renderCalendarButtons();
 
-        async function showMonth(
-            monthName
-        ) {
+        renderEvents();
+    }
 
-            currentMonth =
-                monthName;
 
+    /* =========================
+       LOGOUT
+    ========================= */
 
-            await loadEvents();
+    logoutButton.addEventListener(
+        "click",
+        logout
+    );
 
 
-            app.innerHTML = "";
+    async function logout() {
 
+        await supabaseClient.auth.signOut();
 
-            const monthNumber =
-                MONTHS[monthName];
+        app.style.display =
+            "none";
 
+        monthScreen.style.display =
+            "none";
 
-            const totalDays =
-                daysInMonth(
-                    monthNumber
-                );
+        startScreen.style.display =
+            "none";
 
+        loginScreen.style.display =
+            "flex";
 
-            /* -------------------------
-               LOGOUT
-               ------------------------- */
+        emailInput.value =
+            "";
 
-            const logoutButton =
-                document.createElement(
-                    "button"
-                );
+        passwordInput.value =
+            "";
 
+        loginMessage.textContent =
+            "";
 
-            logoutButton.className =
-                "logout-button";
+        currentCalendar =
+            null;
 
+        currentMonth =
+            null;
 
-            logoutButton.textContent =
-                "Log out";
+        events =
+            {};
+    }
 
 
-            logoutButton.addEventListener(
-                "click",
-                logout
-            );
+    /* =========================
+       CHECK EXISTING SESSION
+    ========================= */
 
+    async function checkSession() {
 
-            app.appendChild(
-                logoutButton
-            );
-
-
-            /* -------------------------
-               MONTH IMAGE
-               ------------------------- */
-
-            const monthContainer =
-                document.createElement(
-                    "section"
-                );
-
-
-            monthContainer.className =
-                "month-image-container";
-
-
-            const image =
-                document.createElement(
-                    "img"
-                );
-
-
-            image.className =
-                "month-image";
-
-
-            image.src =
-                `${monthName}.png`;
-
-
-            image.alt =
-                `${MONTH_NAMES[monthNumber]} ${YEAR} calendar`;
-
-
-            monthContainer.appendChild(
-                image
-            );
-
-
-            /* -------------------------
-               BACK BUTTON
-               ------------------------- */
-
-            const back =
-                document.createElement(
-                    "button"
-                );
-
-
-            back.className =
-                "click-area back-button";
-
-
-            back.setAttribute(
-                "aria-label",
-                "Back to months"
-            );
-
-
-            back.addEventListener(
-                "click",
-                showStart
-            );
-
-
-            monthContainer.appendChild(
-                back
-            );
-
-
-            /* -------------------------
-               DATE BUTTONS
-               ------------------------- */
-
-            const cellWidth =
-                876 / 7;
-
-
-            const cellHeight =
-                667 / 6;
-
-
-            for (
-                let day = 1;
-                day <= totalDays;
-                day++
-            ) {
-
-                const position =
-                    getDayPosition(
-                        monthNumber,
-                        day
-                    );
-
-
-                if (
-                    position.row >= 6
-                ) {
-
-                    continue;
-
-                }
-
-
-                const button =
-                    document.createElement(
-                        "button"
-                    );
-
-
-                button.className =
-                    "day-button";
-
-
-                const left =
-                    112 +
-                    position.column *
-                    cellWidth;
-
-
-                const top =
-                    358 +
-                    (position.row + 1) *
-                    cellHeight;
-
-
-                button.style.left =
-                    (
-                        left /
-                        1080 *
-                        100
-                    ) + "%";
-
-
-                button.style.top =
-                    (
-                        top /
-                        1920 *
-                        100
-                    ) + "%";
-
-
-                button.style.width =
-                    (
-                        cellWidth /
-                        1080 *
-                        100
-                    ) + "%";
-
-
-                button.style.height =
-                    (
-                        cellHeight /
-                        1920 *
-                        100
-                    ) + "%";
-
-
-                button.setAttribute(
-                    "aria-label",
-                    `Add event on ${day} ${MONTH_NAMES[monthNumber]}`
-                );
-
-
-                button.addEventListener(
-                    "click",
-                    () => {
-
-                        openAddEvent(
-                            monthName,
-                            day
-                        );
-
-                    }
-                );
-
-
-                monthContainer.appendChild(
-                    button
-                );
-
-
-                /* =================================================
-                   EVENT RECTANGLE INSIDE DAY BOX
-
-                   This is the part that was missing from the
-                   Supabase version.
-                   ================================================= */
-
-                const dayEvents =
-                    events[
-                        String(monthNumber)
-                    ]?.[
-                        String(day)
-                    ] || [];
-
-
-                if (
-                    dayEvents.length > 0
-                ) {
-
-                    const indicator =
-                        document.createElement(
-                            "div"
-                        );
-
-
-                    indicator.className =
-                        "event-indicator";
-
-
-                    indicator.style.left =
-                        (
-                            left /
-                            1080 *
-                            100
-                        ) + "%";
-
-
-                    indicator.style.top =
-                        (
-                            (
-                                top +
-                                cellHeight * 0.72
-                            ) /
-                            1920 *
-                            100
-                        ) + "%";
-
-
-                    indicator.style.width =
-                        (
-                            cellWidth /
-                            1080 *
-                            100
-                        ) + "%";
-
-
-                    indicator.style.height =
-                        (
-                            cellHeight *
-                            0.12 /
-                            1920 *
-                            100
-                        ) + "%";
-
-
-                    monthContainer.appendChild(
-                        indicator
-                    );
-
-                }
-
+        const {
+            data: {
+                session
             }
+        } =
+            await supabaseClient.auth.getSession();
 
 
-            app.appendChild(
-                monthContainer
-            );
+        if (session) {
 
+            await startApp();
 
-            /* =====================================================
-               EVENTS LIST
-               ===================================================== */
+        } else {
 
-            const eventsArea =
-                document.createElement(
-                    "section"
-                );
+            loginScreen.style.display =
+                "flex";
 
-
-            eventsArea.className =
-                "events-area";
-
-
-            const list =
-                document.createElement(
-                    "div"
-                );
-
-
-            list.className =
-                "events-list";
-
-
-            const monthKey =
-                String(monthNumber);
-
-
-            const monthEvents =
-                events[
-                    monthKey
-                ] || {};
-
-
-            const days =
-                Object.keys(
-                    monthEvents
-                )
-                .map(Number)
-                .sort(
-                    (a, b) => a - b
-                );
-
-
-            for (
-                const day of days
-            ) {
-
-                const dayEvents =
-                    monthEvents[
-                        String(day)
-                    ] || [];
-
-
-                dayEvents.forEach(
-                    eventData => {
-
-                        const card =
-                            document.createElement(
-                                "div"
-                            );
-
-
-                        card.className =
-                            "event-card";
-
-
-                        card.textContent =
-                            `${day}, ${MONTH_NAMES[monthNumber]} - ${eventData.text}`;
-
-
-                        /* Desktop double-click */
-
-                        card.addEventListener(
-                            "dblclick",
-                            event => {
-
-                                event.preventDefault();
-
-
-                                askDelete(
-                                    monthName,
-                                    day,
-                                    eventData.id,
-                                    eventData.text
-                                );
-
-                            }
-                        );
-
-
-                        /* Mobile double-tap */
-
-                        let lastTap = 0;
-
-
-                        card.addEventListener(
-                            "touchend",
-                            event => {
-
-                                const now =
-                                    Date.now();
-
-
-                                const difference =
-                                    now - lastTap;
-
-
-                                if (
-                                    difference > 0 &&
-                                    difference < 450
-                                ) {
-
-                                    event.preventDefault();
-
-
-                                    askDelete(
-                                        monthName,
-                                        day,
-                                        eventData.id,
-                                        eventData.text
-                                    );
-
-                                }
-
-
-                                lastTap = now;
-
-                            },
-                            {
-                                passive: false
-                            }
-                        );
-
-
-                        list.appendChild(
-                            card
-                        );
-
-                    }
-                );
-
-            }
-
-
-            eventsArea.appendChild(
-                list
-            );
-
-
-            app.appendChild(
-                eventsArea
-            );
-
-
-            window.scrollTo(
-                0,
-                0
-            );
+            app.style.display =
+                "none";
         }
+    }
 
 
-        /* =====================================================
-           ADD EVENT MODAL
-           ===================================================== */
+    checkSession();
 
-        function openAddEvent(
-            monthName,
-            day
-        ) {
-
-            const monthNumber =
-                MONTHS[monthName];
-
-
-            modal.innerHTML = `
-
-                <h2>
-                    ${day}
-                    ${MONTH_NAMES[monthNumber]}
-                    ${YEAR}
-                </h2>
-
-
-                <input
-                    id="eventInput"
-                    type="text"
-                    maxlength="120"
-                    placeholder="Type your event..."
-                    autocomplete="off"
-                >
-
-
-                <div class="modal-buttons">
-
-                    <button
-                        class="add-button"
-                        id="addEvent"
-                    >
-                        Add
-                    </button>
-
-
-                    <button
-                        class="cancel-button"
-                        id="cancelAdd"
-                    >
-                        Cancel
-                    </button>
-
-                </div>
-
-            `;
-
-
-            modalBackground.classList.add(
-                "visible"
-            );
-
-
-            const input =
-                document.getElementById(
-                    "eventInput"
-                );
-
-
-            input.focus();
-
-
-            document
-                .getElementById(
-                    "addEvent"
-                )
-                .addEventListener(
-                    "click",
-                    async () => {
-
-                        const text =
-                            input.value.trim();
-
-
-                        if (!text) {
-                            return;
-                        }
-
-
-                        const success =
-                            await addEvent(
-                                monthNumber,
-                                day,
-                                text
-                            );
-
-
-                        if (!success) {
-                            return;
-                        }
-
-
-                        closeModal();
-
-
-                        await showMonth(
-                            monthName
-                        );
-
-                    }
-                );
-
-
-            document
-                .getElementById(
-                    "cancelAdd"
-                )
-                .addEventListener(
-                    "click",
-                    closeModal
-                );
-
-
-            input.addEventListener(
-                "keydown",
-                event => {
-
-                    if (
-                        event.key ===
-                        "Enter"
-                    ) {
-
-                        document
-                            .getElementById(
-                                "addEvent"
-                            )
-                            .click();
-
-                    }
-
-
-                    if (
-                        event.key ===
-                        "Escape"
-                    ) {
-
-                        closeModal();
-
-                    }
-
-                }
-            );
-        }
-
-
-        /* =====================================================
-           DELETE EVENT
-           ===================================================== */
-
-        function askDelete(
-            monthName,
-            day,
-            eventId,
-            text
-        ) {
-
-            modal.innerHTML = `
-
-                <h2>
-                    Delete event?
-                </h2>
-
-
-                <div class="delete-message">
-                    ${escapeHtml(text)}
-                </div>
-
-
-                <div class="modal-buttons">
-
-                    <button
-                        class="delete-button"
-                        id="confirmDelete"
-                    >
-                        Delete
-                    </button>
-
-
-                    <button
-                        class="cancel-button"
-                        id="cancelDelete"
-                    >
-                        Cancel
-                    </button>
-
-                </div>
-
-            `;
-
-
-            modalBackground.classList.add(
-                "visible"
-            );
-
-
-            document
-                .getElementById(
-                    "confirmDelete"
-                )
-                .addEventListener(
-                    "click",
-                    async () => {
-
-                        const success =
-                            await deleteEvent(
-                                eventId
-                            );
-
-
-                        if (!success) {
-                            return;
-                        }
-
-
-                        closeModal();
-
-
-                        await showMonth(
-                            monthName
-                        );
-
-                    }
-                );
-
-
-            document
-                .getElementById(
-                    "cancelDelete"
-                )
-                .addEventListener(
-                    "click",
-                    closeModal
-                );
-        }
-
-
-        /* =====================================================
-           MODAL HELPERS
-           ===================================================== */
-
-        function closeModal() {
-
-            modalBackground.classList.remove(
-                "visible"
-            );
-
-
-            modal.innerHTML = "";
-        }
-
-
-        modalBackground.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target ===
-                    modalBackground
-                ) {
-
-                    closeModal();
-
-                }
-
-            }
-        );
-
-
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (
-                    event.key ===
-                    "Escape"
-                ) {
-
-                    closeModal();
-
-                }
-
-            }
-        );
-
-
-        /* =====================================================
-           HTML ESCAPING
-           ===================================================== */
-
-        function escapeHtml(text) {
-
-            return String(text)
-
-                .replaceAll(
-                    "&",
-                    "&amp;"
-                )
-
-                .replaceAll(
-                    "<",
-                    "&lt;"
-                )
-
-                .replaceAll(
-                    ">",
-                    "&gt;"
-                )
-
-                .replaceAll(
-                    '"',
-                    "&quot;"
-                )
-
-                .replaceAll(
-                    "'",
-                    "&#039;"
-                );
-        }
-
-
-        /* =====================================================
-           START APP
-           ===================================================== */
-
-        checkLogin();
-
-    </script>
+</script>
+```
 
 </body>
-
 </html>
