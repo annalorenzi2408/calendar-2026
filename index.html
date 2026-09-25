@@ -210,6 +210,27 @@
         .events-area {
             width: 100%;
             background: var(--blue);
+
+            /*
+                The month images are drawn on a 1080x1920
+                canvas (same reference grid used for the
+                day-button math below), and the calendar
+                grid ends at roughly 59% of that height —
+                the rest is blank blue space baked into the
+                image itself. Pulling this section up by
+                that leftover percentage (measured against
+                the image's own width, since % margins are
+                width-relative) makes it sit right under the
+                visible grid instead of under the empty part
+                of the image. Nudge the percentage below if
+                it's not perfectly flush: a bigger number
+                pulls it up further, a smaller one leaves
+                more gap.
+            */
+            margin-top: -72.6%;
+            position: relative;
+            z-index: 1;
+
             padding: 24px 0 60px;
         }
 
@@ -537,7 +558,7 @@
         */
 
         const SUPABASE_KEY =
-            "sb_publishable_HiSngqkznKGRf4fV1tZc4g_CWfoTakE";
+            "PASTE_YOUR_EXISTING_PUBLISHABLE_KEY_HERE";
 
 
         const supabaseClient =
