@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -2047,17 +2046,3 @@
 </body>
 
 </html>
-```
-
-**One thing before you commit it:** find this line near the top of the JavaScript:
-
-```js
-const SUPABASE_KEY =
-    "PASTE_YOUR_EXISTING_PUBLISHABLE_KEY_HERE";
-```
-
-Replace only the text between the quotes with the **publishable key you already have**.
-
-I also fixed the logout-button bug from the previous version. The event indicator is now generated from the actual Supabase events, so after you add an event, the **little rectangle should appear inside that day's square** and remain there when the other person logs in too.
-
-After you commit this, test **one event on October 1** first. If the rectangle isn't positioned exactly where your original one was, don't change anything else—we can adjust its position without touching the rest of the calendar.
