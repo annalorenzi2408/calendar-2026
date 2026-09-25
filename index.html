@@ -1177,27 +1177,24 @@
             /* -------------------------
                LOGOUT
                ------------------------- */
+            const logoutButton =
+                document.createElement("button");
 
-            const logout =
-                document.createElement(
-                    "button"
-                );
-
-            logout.className =
+            logoutButton.className =
                 "logout-button";
 
-            logout.textContent =
+            logoutButton.textContent =
                 "Log out";
 
-            logout.addEventListener(
+            logoutButton.addEventListener(
                 "click",
-                logout
+            logout
             );
 
             app.appendChild(
-                logout
+                logoutButton
             );
-
+            
 
             /* -------------------------
                MONTH IMAGE
